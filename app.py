@@ -8,28 +8,27 @@ import os
 import json
 
 from attr import attributes
-
-from validators import (format_checker, CustomDateTime, GetLeadCategory,
-                        GetLeadMetadata)
+from validators import (
+    format_checker, CustomDateTime, GetLeadCategory,GetResourceMetadata)
 from flask import Flask, request
 from flask_restx import Api
 from flask_sqlalchemy import SQLAlchemy
-from config import Config
 from werkzeug.middleware.proxy_fix import ProxyFix
-from model import Model
 from flask_restx import Resource, fields
+
+from models import PredictionScore, PredictionRequest
+from model import Model
+from config import Config
 
 
 # =======================================================================================
 # Definición de objetos y variables de configuración de la aplicación
 # ---------------------------------------------------------------------------------------
 app = Flask(__name__)
-
 app.wsgi_app = ProxyFix(app.wsgi_app)
 
 # Puedes cambiar el título del API
 api = Api(app, version='1.0', title='Productos de Datos', format_checker=format_checker)
-
 app.config.from_object(Config)
 
 # SQL Alchemy es una biblioteca para crear objetos que interactuan con la base de datos
@@ -39,40 +38,25 @@ db = SQLAlchemy(app)
 HOST_URL = os.environ['HOST_URL']
 VERSION = 'v1'
 
-from models import Lead, Rate, RequestReceived
-
-########################################################################
-# Define Response model
-########################################################################
-
+# =======================================================================================
+# Configuración del JSON de intercambio en el API REST.
+# https://flask-restx.readthedocs.io/en/latest/marshalling.html#basic-usage
+#
+# Aqui declaras los recursos del API REST. Los nombres de sus propiedades y sus tipos 
+#
+# Datos de consulta al modelo
 lead_display = api.model('Lead', {
-    'fecha_registro': CustomDateTime(description="fecha de registro",
-                                     attribute='registration_date'),
-    'nombre': fields.String(description="nombre completo",
-                            max_length=250, attribute='fullname'),
-    'telefono': fields.String(description="teléfono",
-                              max_length=250, attribute='phone'),
-    'id_snl': fields.String(description="identificador de la base de datos "
-                                        "de SN", max_length=250),
-    'consulta': fields.String(description="texto de consulta",
-                              max_length=250, attribute='query'),
-    'producto': fields.String(description="producto de interés en la consulta",
-                              max_length=250, attribute='product'),
-    'campania': fields.String(description="campaña que generó el lead",
-                              max_length=24, attribute='campaign'),
-    'metadata': GetLeadMetadata(description="datos adicionales"),
+    'client_name': fields.String(description="nombre completo", max_length=250, attribute='client_name'),
+    'metadata': GetResourceMetadata(description="datos adicionales"),
 
 })
 
-
-rate_display = api.model('Rate', {
-    'score_conversion': fields.Float(description="score de probabilidad de "
-                                                 "conversión",
-                                     attribute="conversion_score"),
-    'categoria': GetLeadCategory(description='categoría del lead')
+# Datos del resultado del modelo
+rate_display = api.model('PredictionScore', {
+    'score': fields.Float(description="score del modelo predicitivo", attribute="score")
 })
 
-
+# Respuesta integrada de un resultado
 response_display = api.model('RetrieveResponse', {
     'api_id': fields.String,
     'fecha_consulta': CustomDateTime(description="fecha de petición",
@@ -81,86 +65,47 @@ response_display = api.model('RetrieveResponse', {
     'lead': fields.Nested(lead_display),
 })
 
-create_response_display = api.model('CreateResponse', {
-    'url': fields.String(description="url de recurso"),
-    'api_id': fields.String(description="id de score"),
-    'calificacion': fields.Nested(rate_display, attribute="rate"),
-})
-
-create_request = api.model('CreateRequest', {
-    'version': fields.String(description="version de api"),
-    'lead': fields.Nested(lead_display),
-})
-
-########################################################################
-# Define Routes
-########################################################################
-
-health_ns = api.namespace('health_check', description='Check health '
-                                                      'connection')
+# Crea aquí los demás recursos que vas a necesitar en tu API REST
 
 
+# =======================================================================================
+# Definición de Rutas del API REST
+#
+# ---------------------------------------------------------------------------------------
+health_ns = api.namespace('health_check', description='Check health connection')
 @health_ns.route('/', methods=['GET'])
 class HealthCheck(Resource):
-
+    """ Ruta necesaria para el funcionamiento del motor de Swagger
+    """
     def get(self):
         return "It's fine"
 
 
-lead_rating_ns = api.namespace(VERSION, description='Lead rating')
-
-
+# ---------------------------------------------------------------------------------------
+lead_rating_ns = api.namespace(VERSION, description='Solicitud de modelo')
 @lead_rating_ns.route('/', methods=['POST'])
-class CreateLeadRating(Resource):
+class CreatePrediction(Resource):
+    """ Recurso REST que contiene la llamada al modelo predictivo
+    """
 
-    # TODO: Activar validate y permitir json dinamico en metadata
     @api.expect(create_request, validate=False)
     @api.marshal_with(create_response_display)
     def post(self):
-        data = request.get_json()
-        request_r = RequestReceived(request=json.dumps(data))
-        db.session.add(request_r)
-        db.session.commit()
-        score, category = Model.get_rating(data=data)
-        new_rate = Rate(
-            conversion_score=score,
-            category=category)
-        db.session.add(new_rate)
-        db.session.commit()
-        lead = data.get('lead')
-        new_lead = Lead(
-            registration_date=lead.get('fecha_registro'),
-            fullname=lead.get('nombre'),
-            phone=lead.get('telefono'),
-            query=lead.get('consulta'),
-            product=lead.get('producto'),
-            campaign=lead.get('campania'),
-            extra_data=lead.get('metadata'),
-            id_snl=lead.get('id_snl'),
-            rate_id=new_rate.id)
-        db.session.add(new_lead)
-        db.session.commit()
-        ################################################################
-        response = {
-            "url": HOST_URL + VERSION + '/'+str(new_rate.api_id),
-            "api_id": str(new_rate.api_id),
-            "rate": new_rate
-        }
-        request_r.processed = True
-        db.session.commit()
-        return response
+        """ Aquí debes de invocar al modelo predictivo, crear los objetos necesarios y
+            guardarlos en la base de datos.
+            Además debes de construir una respuesta y devolverla como resultado
+        """
+        return None
 
 
+# ---------------------------------------------------------------------------------------
 @lead_rating_ns.route('/<uuid:api_id>', methods=['GET'])
 class LeadRating(Resource):
+    """ Recurso REST para procesar solicitudes históricas del modelo
+    """
 
     @api.marshal_with(response_display)
     def get(self, api_id):
-        rate = Rate.query.filter_by(api_id=api_id).first()
-        response = {
-            "api_id": rate.api_id,
-            "request_date": rate.created_dt,
-            "rate": rate,
-            "lead": rate.lead
-        }
-        return response
+        """ Procesa aquí la solicitud a una llamada histórica y devuelve su resultado
+        """
+        return None

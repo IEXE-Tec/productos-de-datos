@@ -46,7 +46,7 @@ class CustomDateTime(fields.DateTime):
 
 
 # =======================================================================================
-class GetLeadMetadata(fields.Raw):
+class GetResourceMetadata(fields.Raw):
     """ Valor adicional en el JSON de consulta con un diccionario libre, de la forma
         llave:valor
     """

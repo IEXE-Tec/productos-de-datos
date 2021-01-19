@@ -48,3 +48,10 @@ class PredictionScore(db.Model, BaseModel):
         """ Genera la representación en string de una instancia de un modelo.
         """
         return f"<Rate {self.id}: {self.score}>"
+
+
+# =======================================================================================
+class PredictionRequest(db.Model, BaseModel):
+    """ Llena aquí las propiedades de tu modelo predictivo
+    """
+    pass
