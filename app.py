@@ -1,3 +1,9 @@
+# =======================================================================================
+#                        IEXE Tec - Maestría en Ciencia de Datos
+#                                  Productos de Datos
+# ---------------------------------------------------------------------------------------
+# Este es el script que procesa las llamadas al API REST.
+# =======================================================================================
 import os
 import json
 
@@ -14,19 +20,20 @@ from model import Model
 from flask_restx import Resource, fields
 
 
-########################################################################
-# Configurations
-########################################################################
+# =======================================================================================
+# Definición de objetos y variables de configuración de la aplicación
+# ---------------------------------------------------------------------------------------
 app = Flask(__name__)
 
 app.wsgi_app = ProxyFix(app.wsgi_app)
 
-api = Api(app, version='1.0', title='SNL Lead rating API',
-          format_checker=format_checker)
+# Puedes cambiar el título del API
+api = Api(app, version='1.0', title='Productos de Datos', format_checker=format_checker)
 
 app.config.from_object(Config)
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 
+# SQL Alchemy es una biblioteca para crear objetos que interactuan con la base de datos
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db = SQLAlchemy(app)
 
 HOST_URL = os.environ['HOST_URL']

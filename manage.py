@@ -1,3 +1,10 @@
+# =======================================================================================
+#                        IEXE Tec - Maestría en Ciencia de Datos
+#                                  Productos de Datos
+# ---------------------------------------------------------------------------------------
+# Punto de entrada a la aplicación. Este script se invoca desde el administrador de 
+# aplicaciones -en este caso GUnicorn- para crear una instancia de la aplicación 
+# =======================================================================================
 import os
 from flask_script import Manager
 from flask_migrate import Migrate, MigrateCommand
