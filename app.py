@@ -8,18 +8,14 @@ import os
 import json
 
 from attr import attributes
-from validators import (
-    format_checker, CustomDateTime, GetLeadCategory,GetResourceMetadata)
+from validators import (format_checker, CustomDateTime)
 from flask import Flask, request
 from flask_restx import Api
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.middleware.proxy_fix import ProxyFix
 from flask_restx import Resource, fields
 
-from models import PredictionScore, PredictionRequest
-from model import Model
 from config import Config
-
 
 # =======================================================================================
 # Definición de objetos y variables de configuración de la aplicación
@@ -34,6 +30,9 @@ app.config.from_object(Config)
 # SQL Alchemy es una biblioteca para crear objetos que interactuan con la base de datos
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 db = SQLAlchemy(app)
+
+from models import PredictionScore, PredictionRequest
+from model import Model
 
 HOST_URL = os.environ['HOST_URL']
 VERSION = 'v1'

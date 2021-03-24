@@ -10,7 +10,6 @@ from datetime import datetime
 from sqlalchemy.dialects.postgresql import UUID, JSON
 from app import db
 
-
 # =======================================================================================
 class BaseModel:
     """ Modelo base que agrega dos columnas a cada tabla de la base de datos:
