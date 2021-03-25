@@ -21,7 +21,7 @@ Instalación
       $ source ~/entornos/productos_de_datos/bin/activate
       $ pip install -m requirements.txt
 
-3. Ubícate en alguna de las versiones dedicadas a cada entregable
+3. Ubícate en alguna de las versiones dedicadas a cada entregable:
 
    .. code-block:: console
 
@@ -39,10 +39,18 @@ Ejecución
 ---------
 
 1. Exporta la variable de entorno ``FLASK_APP``:
-   
+
+   Windows:
+
    .. code-block:: console
 
       $ export FLASK_APP=model_api.py
+
+   Linux / Mac:
+
+   .. code-block:: console
+
+      $ set FLASK_APP=model_api.py      
 
 2. Inicia el servidor de pruebas de Flask:
 
@@ -64,16 +72,4 @@ Ejecución
    
    Si usas Cloud9 debes de abrir el firewall de AWS. Consulta los manuales de la clase para saber cómo.
 
-***********
-
-Entregable 3
-------------
-
-En este entregable debes de procesar solicitudes POST que agreguen una nueva inferencia
-
-Entregable 4
-------------
-
-En este entregable debes de procesar solicitudes GET que devuelven la lista de inferencias
-históricas que existen en la base de datos.
-
+4. Lee con cuidado los comentarios del código fuente para modificar cada entrega.
