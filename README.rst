@@ -15,35 +15,21 @@ Ubícate en alguna de las versiones dedicadas a cada entregable
 
 .. code-block:: console
 
-    $ git checkout entregable_2
+    $ git checkout entregable_n
 
-.. code-block:: console
+Donde ``<entregable_n>`` es el número de entregable:
 
-    $ git checkout entregable_3
+* ``<entregable_2>`` contiene los archivos para integrar tu modelo predictivo
+* ``<entregable_3>`` contiene los archivos para integrar tu modelo predictivo
+* ``<entregable_4>`` contiene los archivos para integrar tu modelo predictivo
+* ``<entregable_5>`` contiene los archivos para integrar tu modelo predictivo
+* ``<entregable_6>`` contiene los archivos para integrar tu modelo predictivo
 
-.. code-block:: console
-
-    $ git checkout entregable_4
-
-.. code-block:: console
-
-    $ git checkout entregable_5
-
-.. code-block:: console
-
-    $ git checkout entregable_6
-
-### Código para la Lección 2
-
-### Código para la Lección 3
-
-### Código para la Lección 4
+Entregable 2
+------------
 
 En este entregable necesitas modificar los siguientes archivos:
 
  * [model_api.py](model_api.py)
  * [models.py](models.py)
 
-### Código para la Lección 5
-
-### Código para la Lección 6
