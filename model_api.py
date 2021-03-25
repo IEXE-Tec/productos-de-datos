@@ -1,15 +1,17 @@
+import os
+
 from flask import Flask
-from flask import url_for
 from flask_sqlalchemy import SQLAlchemy
 from flask_restx import Api, Resource, fields
 from werkzeug.middleware.proxy_fix import ProxyFix
 
 app = Flask(__name__)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:////prods_datos.db'
+db_uri = 'sqlite:///{}/prods_datos.db'.format(os.path.dirname(__file__))
+print(db_uri)
+app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 db.init_app(app)
-db.create_all()
 
 app.wsgi_app = ProxyFix(app.wsgi_app)
 api = Api(
@@ -20,12 +22,15 @@ api = Api(
 
 from models import Prediction
 
+db.create_all()
+
 ns = api.namespace('predicciones', description='predicciones')
 
 # =======================================================================================
-prediction_repr = api.model('Prediccion', {
-    'input': fields.String(description="datos de entrada del modelo"),
-    'score': fields.Float(description="score de probabilidad de conversión")
+observacion_repr = api.model('Observacion', {
+    'variable_1': fields.String(description="Una variable de entrada"),
+    'variable_2': fields.String(description="Una variable de entrada"),
+    'variable_3': fields.Float(description="Una variable de entrada"),
 })
 
 
@@ -44,14 +49,18 @@ class PredictionListAPI(Resource):
     # -----------------------------------------------------------------------------------
     #@ns.doc('list_preds')
     #@ns.marshal_list_with(prediction_repr)
-    @ns.expect(prediction_repr)
+    @ns.expect(observacion_repr)
     def post(self):
         prediction = Prediction(representation=api.payload)
+        # Aqui llama a tu modelo
+        prediction.score = 0.99
+        print(prediction)
         db.session.add(prediction)
         db.session.commit()
-        print(prediction)
+        response_url = api.url_for(PredictionAPI, prediction_id=prediction.prediction_id)
         response = {
-            "url": 'yeah' + '/'+str(prediction.prediction_id),
+            "score": prediction.score,
+            "url": f'{api.base_url[:-1]}{response_url}',
             "api_id": str(prediction.prediction_id)
         }
         return response, 200

@@ -132,3 +132,6 @@ dmypy.json
 
 *.code-workspace
 __pycache__
+*.db
+*.sqlite
+*.sqlite3
