@@ -21,28 +21,25 @@ Instalación
 
 2. Crea un ambiente autocontenido:
 
-    .. code-block:: console
+   .. code-block:: console
 
-       $ python3 -m venv ~/entornos/productos_de_datos/
-
-       $ source ~/entornos/productos_de_datos/bin/activate
-
-       $ pip install -m requirements.txt
-
+      $ python3 -m venv ~/entornos/productos_de_datos/
+      $ source ~/entornos/productos_de_datos/bin/activate
+      $ pip install -m requirements.txt
 
 3. Ubícate en alguna de las versiones dedicadas a cada entregable
 
-    .. code-block:: console
+   .. code-block:: console
 
-        $ git checkout entregable_n
+      $ git checkout entregable_n
 
-    Donde ``<entregable_n>`` es el número de entregable:
-
-        * ``<entregable_2>`` contiene los archivos para integrar tu modelo predictivo
-        * ``<entregable_3>`` contiene los archivos para integrar tu modelo predictivo
-        * ``<entregable_4>`` contiene los archivos para integrar tu modelo predictivo
-        * ``<entregable_5>`` contiene los archivos para integrar tu modelo predictivo
-        * ``<entregable_6>`` contiene los archivos para integrar tu modelo predictivo
+   Donde ``<entregable_n>`` es el número de entregable:
+   
+      * ``<entregable_2>`` contiene los archivos para integrar tu modelo predictivo
+      * ``<entregable_3>`` contiene los archivos para integrar tu modelo predictivo
+      * ``<entregable_4>`` contiene los archivos para integrar tu modelo predictivo
+      * ``<entregable_5>`` contiene los archivos para integrar tu modelo predictivo
+      * ``<entregable_6>`` contiene los archivos para integrar tu modelo predictivo
 
 Entregable 3
 ------------
