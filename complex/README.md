@@ -1,1 +1,0 @@
-# iexetec-lead-rating-api
