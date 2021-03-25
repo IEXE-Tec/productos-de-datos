@@ -1,27 +1,58 @@
+# =======================================================================================
+#                       IEXE Tec - Maestría en Ciencia de Datos 
+#                       Productos de Datos. Proyecto Integrador
+# =======================================================================================
 import os
 import random
-
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_restx import Api, Resource, fields
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+# ---------------------------------------------------------------------------------------
+#                       Configuración del proyecto
+# Se usa la biblioteca Flask-RESTX para convertir la aplicación web en un API REST.
+# Consulta la documentación de la biblioteca aquí: https://flask-restx.readthedocs.io/en/latest/quickstart.html
 app = Flask(__name__)
+app.wsgi_app = ProxyFix(app.wsgi_app)
+
+# El manejador de base de datos será SQLite (https://www.sqlite.org/index.html)
+# Flask crea automáticamente un archivo llamado "prods_datos.db" en el directorio local
+# *** IMPORTANTE: Si modificas los modelos de la base de datos es necesario que elimines
+#     el archivo "prods_datos.db", para que Flask genere las nuevas tablas con los cambios
 db_uri = 'sqlite:///{}/prods_datos.db'.format(os.path.dirname(__file__))
-print(db_uri)
 app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# La biblioteca SQLAlchemy permite modelar las tablas de la base de datos como objetos
+# de Python. SQLAlchemy se encarga de hacer las consultas necesarias sin necesidad de
+# escribir SQL. Consulta la documentación de SQLAlchemy aquí: https://www.sqlalchemy.org/
+# Esta biblioteca te permite cambiar muy fácilmente de manejador de base de datos, puedes
+# usar MySQL o Postgres sin tener que cambiar el código de la aplicación
 db = SQLAlchemy(app)
 db.init_app(app)
 
-app.wsgi_app = ProxyFix(app.wsgi_app)
+# El objeto "api" nos permite acceder a las funcionalidades de Flask-RESTX para la
+# implementación de un API REST. Cambia el título y la descripción del proeyecto por uno
+# más acorde a lo que hace tu modelo predictivo.
 api = Api(
     app, 
-    version='1.0', title='My Model API',
-    description='API para el Modelo de Ciencia de Datos',
+    version='1.0', title='API REST',
+    description='API REST para el Modelo de Ciencia de Datos',
 )
+
+# Los espacios de nombre o namespaces permiten estructurar el API REST según los distintos
+# recursos que exponga el API. Para este proyecto se usa sólo un namespace de nombre
+# "predicciones". Es un recurso genérico para crear este ejemplo. Cambia el nombre del
+# espacio de nombres por uno más acorde a tu proyecto. 
+# Consulta la documentación de los espacios de nombre aquí: https://flask-restx.readthedocs.io/en/latest/scaling.html
 ns = api.namespace('predicciones', description='predicciones')
 
+# Para evitar una referencia circular en las dependencias del código, los modelos que
+# interactúan con la base de datos se importan hasta el final de la configuración del
+# proyecto. 
+# Consulta el script "models.py" para conocer y modificar los mapeos de tablas en la 
+# base de datos.
 from models import Prediction
 db.create_all()
 
@@ -32,7 +63,7 @@ observacion_repr = api.model('Observacion', {
     'variable_3': fields.Float(description="Una variable de entrada")
 })
 
-# =======================================================================================
+# ---------------------------------------------------------------------------------------
 prediction_repr = api.model('Prediccion', {
     'variable_1': fields.String(description="Una variable de entrada"),
     'variable_2': fields.String(description="Una variable de entrada"),
