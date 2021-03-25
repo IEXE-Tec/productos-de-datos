@@ -72,4 +72,6 @@ Ejecución
    
    Si usas Cloud9 debes de abrir el firewall de AWS. Consulta los manuales de la clase para saber cómo.
 
-4. Lee con cuidado los comentarios del código fuente para modificar cada entrega.
+*****
+
+Finalmente, lee con cuidado los comentarios del código fuente para modificar cada entrega.
