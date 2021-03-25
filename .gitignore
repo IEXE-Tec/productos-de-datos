@@ -131,3 +131,4 @@ dmypy.json
 .idea/
 
 *.code-workspace
+__pycache__
