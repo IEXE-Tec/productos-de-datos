@@ -1,8 +1,9 @@
-## IEXE Tec - Maestría en Ciencia de Datos 
+======================================= 
+IEXE Tec - Maestría en Ciencia de Datos 
+=======================================
 
-### Proyecto Final
-
-### Instalación
+Proyecto Final
+==============
 
 Descarga este repositorio:
 
