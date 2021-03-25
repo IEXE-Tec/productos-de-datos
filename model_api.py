@@ -124,44 +124,14 @@ class PredictionListAPI(Resource):
         db.session.commit()
 
         # Las siguientes líneas son para devolver los datos de la nueva prediccion
-        response_url = api.url_for(PredictionAPI, prediction_id=prediction.prediction_id)
         response = {
             "score": prediction.score,  # el score que generó el modelo
-            "url": f'{api.base_url[:-1]}{response_url}',  # el URL de esta predicción
             "api_id": prediction.prediction_id  # El identificador de la base de datos
         }
 
         # La siguiente línea devuelve la respuesta a la solicitud POST con los datos
         # de la nueva predicción, acompañados del código HTTP 201: Created
         return response, 201
-
-# =======================================================================================
-# La siguiente línea de código maneja las solicitudes GET del listado de predicciones 
-# acompañadas de un identificador de predicción, para obtener los datos de una particular
-# Si el API permite modificar predicciones particulares, aquí se debería de manejar el
-# método PUT o PATCH para una predicción en particular.
-@ns.route('/<int:prediction_id>', methods=['GET'])
-class PredictionAPI(Resource):
-    """ Manejador de una predicción particular
-    """
-
-    # -----------------------------------------------------------------------------------
-    @ns.doc({'prediction_id': 'Identificador de la predicción'})
-    def get(self, prediction_id):
-        """ Procesa las solicitudes GET de una predicción particular
-            :param prediction_id: El identificador de la predicción a buscar
-        """
-
-        # Usamos la clase Prediction que mapea la tabla en la base de datos para buscar
-        # la predicción que tiene el identificador que se usó como parámetro de esta
-        # solicitud. Si no existe entonces se devuelve un mensaje de error 404 No encontrado
-        prediction = Prediction.query.filter_by(prediction_id=prediction_id).first()
-        if not prediction:
-            return 'Id {} no existe en la base de datos'.format(prediction_id), 404
-        else:
-            # Se usa la función "marshall_prediction" para convertir la predicción de la
-            # base de datos a un recurso REST
-            return marshall_prediction(prediction), 200
 
 
 # =======================================================================================
@@ -170,7 +140,6 @@ def marshall_prediction(prediction):
         representación de un recurso REST.
         :param prediction: La predicción a transformar
     """
-    response_url = api.url_for(PredictionAPI, prediction_id=prediction.prediction_id)
     model_data = {
         'variable_1': prediction.variable_1,
         'variable_2': prediction.variable_2,
@@ -179,7 +148,6 @@ def marshall_prediction(prediction):
     }
     response = {
         "api_id": prediction.prediction_id,
-        "url": f'{api.base_url[:-1]}{response_url}',
         "created_date": prediction.created_date.isoformat(),
         "prediction": model_data
     }
