@@ -1,5 +1,5 @@
-
-from sqlalchemy.dialects.postgresql import UUID, JSON
+import math
+from datetime import datetime
 
 from model_api import db
 
@@ -14,6 +14,7 @@ class Prediction(db.Model):
     variable_2 = db.Column('variable_2', db.Text, nullable=False)
     variable_3 = db.Column('variable_3', db.Float, nullable=False)
     score = db.Column('score', db.Float, nullable=False)
+    created_date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
 
     # -----------------------------------------------------------------------------------
     def __init__(self, representation=None):
