@@ -35,6 +35,35 @@ Instalación
    * ``entregable_5`` contiene los archivos para actualizar una predicción mediante PUT
    * ``entregable_6`` contiene los archivos para integrar un dashboard simple
 
+Ejecución
+---------
+
+1. Exporta la variable de entorno ``FLASK_APP``:
+   
+   .. code-block:: console
+
+      $ export FLASK_APP=model_api.py
+
+2. Inicia el servidor de pruebas de Flask:
+
+   .. code-block:: console
+
+      $ flask run
+
+   La salida de este comando debe ser algo así::
+
+           * Serving Flask app "model_api.py" (lazy loading)
+           * Environment: development
+           * Debug mode: on
+           * Restarting with stat
+           * Debugger is active!
+           * Debugger PIN: 216-201-467
+           * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+
+3. Abre un navegador en http://127.0.0.1:5000/. 
+   
+   Si usas Cloud9 debes de abrir el firewall de AWS. Consulta los manuales de la clase para saber cómo.
+
 ***********
 
 Entregable 3
