@@ -8,6 +8,8 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_restx import Api, Resource, fields
 from werkzeug.middleware.proxy_fix import ProxyFix
+import pickle
+import numpy
 
 # ---------------------------------------------------------------------------------------
 #                       Configuración del proyecto
@@ -53,21 +55,28 @@ ns = api.namespace('predicciones', description='predicciones')
 # proyecto. 
 # Consulta el script "models.py" para conocer y modificar los mapeos de tablas en la 
 # base de datos.
-from models import Prediction
+from db_models import Prediction
 db.create_all()
 
 # =======================================================================================
 # El siguiente objeto modela un Recurso REST con los datos de entrada para crear una 
 # predicción. Para este ejemplo una observación tiene el nombre genérico "Observacion" 
-# con tres variables. Reemplaza el nombre del objeto por uno más apropiado para el
-# objetivo de tu modelo, además reemplaza las variables y agrega las que sean necesarias
-# para recibir los datos de una observación para que la pueda procesar tu modelo. 
+# con las variables del conjunto de datos tipos de Flores. 
+# https://en.wikipedia.org/wiki/Iris_flower_data_set
+# 
+# Reemplaza el nombre del objeto por uno más apropiado para el objetivo de tu modelo, 
+# además reemplaza las variables y agrega las que sean necesarias para recibir los 
+# datos de una observación para que la pueda procesar tu modelo. 
 observacion_repr = api.model('Observacion', {
-    'variable_1': fields.String(description="Una variable de entrada"),
-    'variable_2': fields.String(description="Una variable de entrada"),
-    'variable_3': fields.Float(description="Una variable de entrada")
+    'sepal_length': fields.Float(description="Longitud del sépalo"),
+    'sepal_width': fields.Float(description="Anchura del sépalo"),
+    'petal_length': fields.Float(description="Longitud del pétalo"),
+    'petal_width': fields.Float(description="Anchura del pétalo"),
 })
 
+
+# =======================================================================================
+predictive_model = pickle.load(open('simple_model.pkl','rb'))
 
 # =======================================================================================
 # Las siguientes clases modelan las solicitudes REST al API. Usamos el objeto del espacio
@@ -114,8 +123,16 @@ class PredictionListAPI(Resource):
         # ---------------------------------------------------------------------
         # Aqui llama a tu modelo predictivo para crear un score o una inferencia
         # o el nombre del valor que devuelve el modelo. Para fines de este
-        # ejemplo simplemente se calcula un valor aleatorio.        
-        prediction.score = trunc(random.random(), 3)
+        # ejemplo simplemente se calcula un valor aleatorio.
+
+        # Crea una observación para alimentar el modelo predicitivo, usando los
+        # datos de entrada del API.
+        model_data = [numpy.array([
+            prediction.sepal_length, prediction.sepal_width, 
+            prediction.petal_length, prediction.petal_width, 
+        ])]
+        prediction.predicted_class = str(predictive_model.predict(model_data)[0])
+        print(prediction.predicted_class)
         # ---------------------------------------------------------------------
 
         # Las siguientes dos líneas de código insertan la predicción a la base
@@ -123,12 +140,11 @@ class PredictionListAPI(Resource):
         db.session.add(prediction)
         db.session.commit()
 
-        # Las siguientes líneas son para devolver los datos de la nueva prediccion
+        # Formar la respuesta de la predicción del modelo
         response = {
-            "score": prediction.score,  # el score que generó el modelo
+            "class": prediction.predicted_class,  # la clase que predijo el modelo
             "api_id": prediction.prediction_id  # El identificador de la base de datos
         }
-
         # La siguiente línea devuelve la respuesta a la solicitud POST con los datos
         # de la nueva predicción, acompañados del código HTTP 201: Created
         return response, 201
@@ -141,10 +157,11 @@ def marshall_prediction(prediction):
         :param prediction: La predicción a transformar
     """
     model_data = {
-        'variable_1': prediction.variable_1,
-        'variable_2': prediction.variable_2,
-        'variable_3': prediction.variable_3,
-        "score": prediction.score
+        'sepal_length': prediction.sepal_length,
+        'sepal_width': prediction.sepal_width,
+        'petal_length': prediction.petal_length,
+        'petal_width': prediction.petal_width,
+        "class": str(prediction.predicted_class)
     }
     response = {
         "api_id": prediction.prediction_id,
