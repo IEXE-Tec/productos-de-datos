@@ -12,14 +12,31 @@ Instalación
    .. code-block:: console
 
        $ git clone https://github.com/IEXE-Tec/productos-de-datos.git
+       $ cd productos-de-datos
 
 2. Crea un ambiente autocontenido:
 
+   Linux / Mac:
+
    .. code-block:: console
 
-      $ python3 -m venv ~/entornos/productos_de_datos/
+      $ python3 -m venv ~/entornos/productos_de_datos
       $ source ~/entornos/productos_de_datos/bin/activate
-      $ pip install -m requirements.txt
+      $ pip install -r requirements.txt
+
+   Puedes usar un directorio distinto a ``~/entornos``. Sólo recuerda usarlo para activar el entorno virtual,
+   u omite este directorio para crear el ambiente en el directorio donde te encuentras.
+
+   Windows:
+
+   .. code-block:: console
+
+      $ python3 -m venv <ruta a al directorio de ambientes>\entornos\productos_de_datos
+      $ <ruta a al directorio de ambientes>\entornos\productos_de_datos\bin\activate.bat
+      $ pip install -r requirements.txt
+
+   Donde ``<ruta a al directorio de ambientes>`` es el directorio donde se va a crear el ambiente virtual,
+   puedes usar otro directorio u omitirlo para crear el entorno en el directorio en el que te encuentras
 
 3. Ubícate en alguna de las versiones dedicadas a cada entregable:
 
@@ -44,13 +61,13 @@ Ejecución
 
    .. code-block:: console
 
-      $ export FLASK_APP=model_api.py
+      $ set FLASK_APP=model_api.py
 
    Linux / Mac:
 
    .. code-block:: console
 
-      $ set FLASK_APP=model_api.py      
+      $ export FLASK_APP=model_api.py      
 
 2. Inicia el servidor de pruebas de Flask:
 
