@@ -234,7 +234,10 @@ class PredictionAPI(Resource):
             return 'Id {} no existe en la base de datos'.format(prediction_id), 404
         else:
             # ---------------------------------------------------------------------------
-            print(api.payload)
+            # Modifica este bloque de código para actualizar la observación con la clase
+            # real. No olvides actualizar la observación en la base de datos, para poder
+            # calcular las métricas de desempeño del modelo.
+            print('Payload: {}'.format(api.payload))
             return 'Observación actualizada', 200
             # ---------------------------------------------------------------------------
 
