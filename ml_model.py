@@ -7,6 +7,7 @@
 from pandas import read_csv
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import confusion_matrix
 import pickle
 
 
@@ -57,6 +58,33 @@ def create_simple_model():
     # archivo nos va a servir para reconstruir el modelo en el API REST. 
     # --------------------------------------------------------------------------------
     pickle.dump(model, open('simple_model.pkl','wb'))
+
+
+# =======================================================================================
+def get_confusion_matrix(predictions):
+    """ Esta función convierte las predicciones que ya tienen calificación en la matriz
+        de confusión de desempeño del modelo.
+        :param predictions: La lista de predicciones calificadas
+        :return: Un diccionario con la matriz de confusión del modelo
+    """
+    y_true = []
+    y_pred = []
+    labels = set()
+    for prediction in predictions:
+        y_true.append(prediction.observed_class)
+        y_pred.append(prediction.predicted_class)
+        labels.add(prediction.observed_class)
+        labels.add(prediction.predicted_class)
+    labels = list(labels)
+    matrix = confusion_matrix(y_true, y_pred, labels=labels)
+    result_matrix = {}
+
+    for actual_label, row in zip(labels, matrix):
+        result_matrix[actual_label] = {}
+        for label, count in zip(labels, row):
+            result_matrix[actual_label][label] = int(count)
+    
+    return result_matrix
 
 
 # =======================================================================================

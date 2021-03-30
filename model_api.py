@@ -11,10 +11,13 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 import pickle
 import numpy
 
+from ml_model import get_confusion_matrix
+
 # ---------------------------------------------------------------------------------------
 #                       Configuración del proyecto
 # Se usa la biblioteca Flask-RESTX para convertir la aplicación web en un API REST.
-# Consulta la documentación de la biblioteca aquí: https://flask-restx.readthedocs.io/en/latest/quickstart.html
+# Consulta la documentación de la biblioteca aquí: 
+# https://flask-restx.readthedocs.io/en/latest/quickstart.html
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app)
 
@@ -47,7 +50,8 @@ api = Api(
 # recursos que exponga el API. Para este proyecto se usa sólo un namespace de nombre
 # "predicciones". Es un recurso genérico para crear este ejemplo. Cambia el nombre del
 # espacio de nombres por uno más acorde a tu proyecto. 
-# Consulta la documentación de los espacios de nombre aquí: https://flask-restx.readthedocs.io/en/latest/scaling.html
+# Consulta la documentación de los espacios de nombre aquí: 
+# https://flask-restx.readthedocs.io/en/latest/scaling.html
 ns = api.namespace('predicciones', description='predicciones')
 
 # Para evitar una referencia circular en las dependencias del código, los modelos que
@@ -84,7 +88,7 @@ classified_observation = api.model('ObservacionCalificada', {
     'sepal_width': fields.Float(description="Anchura del sépalo"),
     'petal_length': fields.Float(description="Longitud del pétalo"),
     'petal_width': fields.Float(description="Anchura del pétalo"),
-    'class': fields.String(description='Clase real de la flor')
+    'observed_class': fields.String(description='Clase real de la flor')
 })
 
 # =======================================================================================
@@ -147,7 +151,6 @@ class PredictionListAPI(Resource):
             prediction.petal_length, prediction.petal_width, 
         ])]
         prediction.predicted_class = str(predictive_model.predict(model_data)[0])
-        print(prediction.predicted_class)
         # ---------------------------------------------------------------------
 
         # Las siguientes dos líneas de código insertan la predicción a la base
@@ -237,9 +240,36 @@ class PredictionAPI(Resource):
             # Modifica este bloque de código para actualizar la observación con la clase
             # real. No olvides actualizar la observación en la base de datos, para poder
             # calcular las métricas de desempeño del modelo.
-            print('Payload: {}'.format(api.payload))
-            return 'Observación actualizada', 200
+            observed_class = api.payload.get('observed_class')
+            prediction.observed_class = observed_class
+            db.session.commit()
+            return 'Observación actualizada: {}'.format(observed_class), 200
             # ---------------------------------------------------------------------------
+
+
+# =======================================================================================
+# La clase ModelPerformanceAPI devuelve el desempeño del modelo, según las observaciones
+# que se han actualizado con las clases reales.
+# Modifica esta clase para que se adapte a tu modelo predictivo.
+@ns.route('/performance/<string:metric>', methods=['GET'])
+class ModelPerformanceAPI(Resource):
+    """ Manejador del recurso REST para el desempeño del modelo.
+    """
+    
+    # -----------------------------------------------------------------------------------
+    @ns.doc({'metric': 'Nombre de la métrica a generar'})
+    def get(self, metric):
+        """ Devuelve los datos de desempeño del modelo.
+        """
+        if metric == 'confusion_matrix':
+            # el método isnot de las propiedades del modelo permiten buscar las 
+            # observaciones que ya están calificadas
+            reported_predictions = Prediction.query.filter(
+                Prediction.observed_class.isnot(None) 
+            ).all()
+            return get_confusion_matrix(reported_predictions), 200
+        else:
+            return 'Métrica no soportada: {}'.format(metric), 400
 
 
 # =======================================================================================
@@ -254,8 +284,10 @@ def marshall_prediction(prediction):
         'sepal_width': prediction.sepal_width,
         'petal_length': prediction.petal_length,
         'petal_width': prediction.petal_width,
-        "class": str(prediction.predicted_class)
+        "predicted_class": str(prediction.predicted_class)
     }
+    if prediction.observed_class:
+        model_data['observed_class'] = prediction.observed_class
     response = {
         "api_id": prediction.prediction_id,
         "url": f'{api.base_url[:-1]}{response_url}',
