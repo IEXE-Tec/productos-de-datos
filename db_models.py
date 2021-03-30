@@ -6,7 +6,6 @@ import math
 from datetime import datetime
 from model_api import db
 
-
 # =======================================================================================
 # Esta clase mapea una predicción a una tabla en la base de datos mediante la biblioteca
 # SQL Alchemy. Consulta la documentación de SQL Alchemy aquí:
@@ -34,8 +33,17 @@ class Prediction(db.Model):
     sepal_width = db.Column('sepal_width', db.Float, nullable=False)
     petal_length = db.Column('petal_length', db.Float, nullable=False)
     petal_width = db.Column('petal_width', db.Float, nullable=False)
-    predicted_class = db.Column('class', db.Text, nullable=False)
-    # score = db.Column('score', db.Float, nullable=False)
+    
+    # Nota que se cambió el nombre de la columna en la BD, de "class" a "predicted_class"
+    predicted_class = db.Column('predicted_class', db.Text, nullable=True)
+
+    # Se agrega la nueva columna "observed_class", que contiene la clase real de la
+    # flor. Modifica estas dos columnas para que se adapten a tu modelo predictivo
+    # IMPORTANTE: Como se modifican la estructura de la base de datos, es necesario
+    # eliminar el archivo "prods_datos.db" para que SQL Alchemy pueda reconstruir la
+    # base de datos de SQLite.
+    observed_class = db.Column('observed_class', db.Text, nullable=True)
+
     # El campo que tiene fecha de creación de este modelo. Por defecto toma la fecha
     # actual del sistema en la zona horarua UTC.
     # https://docs.python.org/3/library/datetime.html
@@ -60,9 +68,11 @@ class Prediction(db.Model):
     def __repr__(self):
         """ Convierte una Predicción a una cadena de texto
         """
-        template_str = '<Prediction [{}]: sepal_length={}, sepal_width={}, petal_length={}, petal_width={}, class={}>'
+        template_str = '''<Prediction [{}]: sepal_length={}, sepal_width={}, 
+        petal_length={}, petal_width={}, predicted_class={}, observed_class={}>'''.strip()
         return template_str.format(
             str(self.prediction_id) if self.prediction_id else 'NOT COMMITED', 
             self.sepal_length, self.sepal_width, self.petal_length, self.petal_width,
-            self.predicted_class or 'No calculado'
+            self.predicted_class or 'No calculado',
+            self.observed_class or 'No reportado',
         )
