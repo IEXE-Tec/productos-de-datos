@@ -61,11 +61,8 @@ def create_simple_model():
 
 
 # =======================================================================================
-def get_confusion_matrix(predictions):
-    """ Esta función convierte las predicciones que ya tienen calificación en la matriz
-        de confusión de desempeño del modelo.
-        :param predictions: La lista de predicciones calificadas
-        :return: Un diccionario con la matriz de confusión del modelo
+def get_simple_confusion_matrix(predictions):
+    """
     """
     y_true = []
     y_pred = []
@@ -77,6 +74,17 @@ def get_confusion_matrix(predictions):
         labels.add(prediction.predicted_class)
     labels = list(labels)
     matrix = confusion_matrix(y_true, y_pred, labels=labels)
+    return (labels, matrix)
+
+# =======================================================================================
+def get_confusion_matrix(predictions):
+    """ Esta función convierte las predicciones que ya tienen calificación en la matriz
+        de confusión de desempeño del modelo.
+        :param predictions: La lista de predicciones calificadas
+        :return: Un diccionario con la matriz de confusión del modelo
+    """
+
+    labels, matrix = get_simple_confusion_matrix(predictions)
     result_matrix = {}
 
     for actual_label, row in zip(labels, matrix):

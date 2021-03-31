@@ -7,11 +7,12 @@ import random
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_restx import Api, Resource, fields
+from flask import render_template
 from werkzeug.middleware.proxy_fix import ProxyFix
 import pickle
 import numpy
 
-from ml_model import get_confusion_matrix
+from ml_model import get_confusion_matrix, get_simple_confusion_matrix
 
 # ---------------------------------------------------------------------------------------
 #                       Configuración del proyecto
@@ -230,7 +231,9 @@ class PredictionAPI(Resource):
 
     # -----------------------------------------------------------------------------------
     def _update_observation(self, prediction_id):
-        """
+        """ Actualiza una observación con la clase real. Tanto el método PUT como PATCH
+            llaman a esta función.
+            :param prediction_id: El identificador de predicción que se va a actualizar
         """
         prediction = Prediction.query.filter_by(prediction_id=prediction_id).first()
         if not prediction:
@@ -262,7 +265,7 @@ class ModelPerformanceAPI(Resource):
         """ Devuelve los datos de desempeño del modelo.
         """
         if metric == 'confusion_matrix':
-            # el método isnot de las propiedades del modelo permiten buscar las 
+            # el método "isnot" de las propiedades del modelo permiten buscar las 
             # observaciones que ya están calificadas
             reported_predictions = Prediction.query.filter(
                 Prediction.observed_class.isnot(None) 
@@ -270,6 +273,27 @@ class ModelPerformanceAPI(Resource):
             return get_confusion_matrix(reported_predictions), 200
         else:
             return 'Métrica no soportada: {}'.format(metric), 400
+
+
+# =======================================================================================
+@app.route('/metrics/')
+def render_metrics():
+    """ Método que obtiene las métricas del modelo y las envía a la plantilla HTML para
+        generar las gráficas.
+    """
+    reported_predictions = Prediction.query.filter(
+            Prediction.observed_class.isnot(None) 
+    ).all()
+    labels, matrix = get_simple_confusion_matrix(reported_predictions)
+    # El archivo "templates/metrics.html" contiene el codigo necesario para desplegar
+    # la gráfica de la matriz de confusión del modelo.
+    # Este template recibe dos argumentos: labels y matrix.
+    #  + Labels: Las etiquetas de la matriz de confusión
+    #  + matrix: La matriz de confusión del modelo
+    #
+    # Consulta este archivo para conocer cómo se usa la biblioteca Highcharts para
+    # generar la gráfica del modelo.
+    return render_template('metrics.html', labels=labels, matrix=matrix)
 
 
 # =======================================================================================
