@@ -10,7 +10,24 @@ from flask_restx import Api, Resource, fields
 from werkzeug.middleware.proxy_fix import ProxyFix
 import pickle
 import numpy
+import os
 
+def verify_pkl_file():
+    nombre_archivo = 'simple_model.pkl'
+
+    # Verifica si el archivo ya existe
+    if not os.path.exists(nombre_archivo):
+        # Crea un objeto vacío o None
+        datos_a_guardar = None
+
+        # Abre el archivo en modo binario para escritura
+        with open(nombre_archivo, 'wb') as archivo:
+            # Guarda el objeto en el archivo
+            pickle.dump(datos_a_guardar, archivo)
+    else:
+        print(f"El archivo {nombre_archivo} ya existe.")
+
+verify_pkl_file()
 # ---------------------------------------------------------------------------------------
 #                       Configuración del proyecto
 # Se usa la biblioteca Flask-RESTX para convertir la aplicación web en un API REST.
